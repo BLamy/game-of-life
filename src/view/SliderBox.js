@@ -2,7 +2,7 @@ import React from "react";
 import { Slider, InputNumber, Row, Col } from "antd";
 
 export default ({
-  onChange = () => {},
+  onChange = value => console.log(`Warning - SliderBox should be controlled (${value})`),
   value = 10,
   step = 1,
   min = 1,

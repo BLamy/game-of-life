@@ -1,6 +1,13 @@
 // The 8 spots to check relative to any cell
 const DELTAS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
 
+// Will generate a random grid given a width and height
+export const generateRandomGrid = (numberOfColumns, numberOfRows) => (
+  new Array(numberOfColumns).fill(0).map(x => 
+    new Array(numberOfRows).fill(0).map(x => Math.round(Math.random()))
+  )
+)
+
 // evolve :: Grid -> Grid
 // 1. Any live cell with fewer than two live neighbors dies, as if caused by under­population.
 // 2. Any live cell with two or three live neighbors lives on to the next generation.
@@ -27,7 +34,7 @@ export const evolveGrid = grid =>
 
 // Produces an iterable which encapsolates the game's state.
 export default function* Game(initialGrid) {
-  let grid = initialGrid;
+  let grid = initialGrid || generateRandomGrid(10, 10);
   while (true) {
     grid = evolveGrid(grid);
     yield grid;
