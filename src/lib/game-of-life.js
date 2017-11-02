@@ -1,7 +1,7 @@
-// The 8 spots to check relative to any 
+// The 8 spots to check relative to any cell
 const DELTAS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1, 1]];
 
-// evolve :: Board -> Board
+// evolve :: Grid -> Grid
 // 1. Any live cell with fewer than two live neighbors dies, as if caused by under­population.
 // 2. Any live cell with two or three live neighbors lives on to the next generation.
 // 3. Any live cell with more than three live neighbors dies, as if by over­population.

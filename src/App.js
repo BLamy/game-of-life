@@ -2,6 +2,7 @@ import React, { Component } from "react";
 import styled from "styled-components";
 import { evolveGrid } from "./lib/game-of-life";
 import { Button } from "antd";
+import SliderBox from "./view/SliderBox";
 
 const Scaffold = styled.div`
   display: flex;
@@ -27,14 +28,18 @@ const Td = styled.td`
   border-collapse: collapse;
   background-color: ${props => (props.alive ? "#607D8B" : "white")};
 `;
-
 const Sidebar = styled.div`
   width: 320px;
   height: 100%;
+  padding: 20px;
+  text-align: center;
   > h1 {
     font-size: 18px;
     width: 100%;
-    text-align: center;
+  }
+  > h2 {
+    font-size: 14px;
+    text-align: left;
   }
 `;
 
@@ -52,24 +57,27 @@ const range = (from, to) => {
 export default class extends Component {
   constructor(props) {
     super(props);
-    const { numberOfColumns = 10, numberOfRows = 10 } = props;
     this.state = {
+      // How long in seconds is each evolution cycle 
+      evolutionSpeed: 1,
+      // Is the game of life currently started
       isStarted: false,
-      game: range(0, numberOfRows).map(row =>
-        range(0, numberOfColumns).map(column => Math.round(Math.random()))
+      // 
+      numberOfColumns: 10,
+      numberOfRows: 10,
+      game: range(0, 10).map(row =>
+        range(0, 10).map(column => Math.round(Math.random()))
       )
     };
   }
 
   startInterval = () => {
-    this.setState({
-      isStarted: true
-    });
     this.interval = setInterval(() => {
       this.setState(({ game }) => ({
+        isStarted: true,
         game: evolveGrid(game)
       }));
-    }, 1000);
+    }, this.state.evolutionSpeed * 1000);
   };
 
   stopInterval = () => {
@@ -77,6 +85,57 @@ export default class extends Component {
     this.setState({
       isStarted: false
     });
+  };
+
+  updateNumberOfColumns = numberOfColumns => {
+    this.setState(state => {
+      if (state.numberOfColumns > numberOfColumns) {
+        return {
+          numberOfColumns,
+          game: state.game.slice(0, numberOfColumns)
+        };
+      } else {
+        return {
+          numberOfColumns,
+          game: [
+            ...state.game,
+            ...new Array(numberOfColumns - state.game.length).fill(
+              new Array(state.numberOfRows).fill(0)
+            )
+          ]
+        };
+      }
+    });
+  };
+
+  updateNumberOfRows = numberOfRows => {
+    this.setState(state => {
+      if (state.numberOfRows > numberOfRows) {
+        return {
+          numberOfRows,
+          game: state.game.map(row => row.slice(0, numberOfRows))
+        };
+      } else {
+        return {
+          numberOfRows,
+          game: state.game.map(row => [
+            ...row,
+            ...new Array(numberOfRows - row.length).fill(0)
+          ])
+        };
+      }
+    });
+  };
+
+  updateEvolutionSpeed = evolutionSpeed => {
+    this.setState({
+        evolutionSpeed
+      },
+      () => {
+        clearInterval(this.interval);
+        this.startInterval();
+      }
+    );
   };
 
   toggleSquareAtIndex = (row, column) => {
@@ -94,13 +153,12 @@ export default class extends Component {
   };
 
   render() {
-    const { numberOfColumns = 10, numberOfRows = 10 } = this.props;
     return (
       <Scaffold>
         <Table>
-          {range(0, numberOfRows).map(row => (
+          {range(0, this.state.numberOfRows).map(row => (
             <Tr>
-              {range(0, numberOfColumns).map(column => (
+              {range(0, this.state.numberOfColumns).map(column => (
                 <Td
                   alive={this.state.game[column][row]}
                   onClick={() => this.toggleSquareAtIndex(row, column)}
@@ -114,6 +172,7 @@ export default class extends Component {
         <Sidebar>
           <h1>Conway's Game of Life</h1>
           <Button
+            style={{ margin: 10 }}
             type="primary"
             disabled={this.state.isStarted}
             onClick={this.startInterval}
@@ -121,12 +180,31 @@ export default class extends Component {
             Start
           </Button>
           <Button
+            style={{ margin: 10 }}
             type="danger"
             disabled={!this.state.isStarted}
             onClick={this.stopInterval}
           >
             Stop
           </Button>
+          <h2>Number of Rows:</h2>
+          <SliderBox
+            value={this.state.numberOfRows}
+            onChange={this.updateNumberOfRows}
+          />
+          <h2>Number of Columns:</h2>
+          <SliderBox
+            value={this.state.numberOfColumns}
+            onChange={this.updateNumberOfColumns}
+          />
+          <h2>Evolution Speed:</h2>
+          <SliderBox
+            min={0.1}
+            max={2}
+            step={0.1}
+            value={this.state.evolutionSpeed}
+            onChange={this.updateEvolutionSpeed}
+          />
         </Sidebar>
       </Scaffold>
     );
