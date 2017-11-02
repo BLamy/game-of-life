@@ -6,7 +6,7 @@ const DELTAS = [[-1, -1], [-1, 0], [-1, 1], [0, -1], [0, 1], [1, -1], [1, 0], [1
 // 2. Any live cell with two or three live neighbors lives on to the next generation.
 // 3. Any live cell with more than three live neighbors dies, as if by over­population.
 // 4. Any dead cell with exactly three live neighbors becomes a live cell, as if by reproduction.
-export default grid =>
+export const evolveGrid = grid =>
   grid.map((columns, x) =>
     columns.map((isLive, y) => {
       const numberOfNeighbors = DELTAS
@@ -25,3 +25,11 @@ export default grid =>
     })
   );
 
+// Produces an iterable which encapsolates the game's state.
+export default function* Game(initialGrid) {
+  let grid = initialGrid;
+  while (true) {
+    grid = evolveGrid(grid);
+    yield grid;
+  }
+}
